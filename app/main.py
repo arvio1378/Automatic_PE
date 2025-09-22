@@ -135,7 +135,7 @@ if pages == "Astinet":
                     st.subheader("Modify Astinet")
                     # Input data modify astinet
                     interface_name = st.text_input("Interface", key="modify_interface")
-                    bandwidth = st.number_input("Bandwidth (Mbps)", key="modify_bandwidth")
+                    bandwidth = st.number_input("Bandwidth (Mbps)", min_value = 1, step = 1, format="%d", key="modify_bandwidth")
                     astinet_type = st.selectbox("Astinet Type", ["Standard", "SME", "Lite (1/2)"], key="modify_type")
 
                     if st.button("Modify Astinet"):

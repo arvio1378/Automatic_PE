@@ -1,4 +1,3 @@
-# utils/astinet/newInstallAst.py
 def activate_astinet(
     connection,
     pe_name,
@@ -10,22 +9,40 @@ def activate_astinet(
     description,
     ip_address
 ):
-    try:
-        # tentukan ratio QoS sesuai tipe
-        if astinet_type.lower() == "standard":
-            ratio = (1, 1)  # 1:1
-        elif astinet_type.lower() == "sme":
-            ratio = (1, 4)  # 1:4
-        elif "lite" in astinet_type.lower():
-            ratio = (1, 2)  # 1:2
-        else:
-            raise ValueError("Tipe Astinet tidak valid!")
+    """
+    Aktivasi layanan Astinet baru di PE.
 
-        # hitung CIR & PIR (inbound, outbound)
-        cir_in = bandwidth * 1024 * ratio[0]
-        pir_in = bandwidth * 1024 * ratio[1]
-        cir_out = bandwidth * 1024 * ratio[0]
-        pir_out = bandwidth * 1024 * ratio[1]
+    Args:
+        connection: Netmiko connection object
+        pe_name (str): nama PE
+        portname (str): contoh "GigabitEthernet3/0/1"
+        vlan (int): VLAN ID
+        bandwidth (int): bandwidth dalam Mbps
+        astinet_type (str): "Standard" | "SME" | "Lite"
+        sid (int): Service ID
+        description (str): deskripsi layanan
+        ip_address (str): IP address dengan mask
+
+    Returns:
+        tuple: (commands, result_config, output_after)
+    """
+    try:
+        # convert Mbps -> Kbps
+        cir = bandwidth * 1024
+
+        # tentukan rasio inbound : outbound
+        if astinet_type.lower() == "standard":
+            cir_in = cir
+            cir_out = cir
+        elif astinet_type.lower() == "sme":
+            cir_in = cir // 4   # inbound dibagi 4
+            cir_out = cir       # outbound tetap
+        elif "lite" in astinet_type.lower():
+            cir_in = cir // 2   # inbound dibagi 2
+            cir_out = cir       # outbound tetap
+        else:
+            cir_in = cir
+            cir_out = cir
 
         # buat perintah konfigurasi
         commands = [
@@ -37,14 +54,14 @@ def activate_astinet(
             "ip binding vpn-instance Astinet_Mix",
             f"ip address {ip_address}",
             "statistic enable",
-            f"qos car cir {cir_in} pir {pir_in} i",
-            f"qos car cir {cir_out} pir {pir_out} o",
+            f"qos car cir {cir_in} pir {cir_in} i",   # inbound (dibagi sesuai tipe)
+            f"qos car cir {cir_out} pir {cir_out} o", # outbound (full)
             "commit",
             "quit",
             "quit"
         ]
 
-        # kirim perintah ke device
+        # kirim konfigurasi
         result_config = connection.send_config_set(
             commands, enter_config_mode=False, cmd_verify=False
         )

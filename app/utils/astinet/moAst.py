@@ -8,7 +8,7 @@ def modify_astinet(connection, interface_name, bandwidth, astinet_type, pe_name=
         connection: Netmiko connection object
         interface_name (str): nama interface, contoh: GigabitEthernet3/0/1.100
         bandwidth (int): bandwidth dalam Mbps
-        astinet_type (str): "Standard" | "SME" | "Lite (1/2)"
+        astinet_type (str): "Standard" | "SME" | "Lite"
         pe_name (str): nama PE (untuk output logging)
 
     Returns:
@@ -20,47 +20,53 @@ def modify_astinet(connection, interface_name, bandwidth, astinet_type, pe_name=
             f"display current-configuration interface {interface_name}"
         )
 
-        # 2. tentukan ratio CIR:PIR
-        cir = bandwidth * 1024  # convert Mbps -> Kbps
-        if astinet_type.lower() == "standard":
-            pir = cir  # 1:1
-        elif astinet_type.lower() == "sme":
-            pir = cir * 4  # 1:4
-        elif "lite" in astinet_type.lower():
-            pir = cir * 2  # 1:2
-        else:
-            pir = cir  # default fallback 1:1
+        # 2. convert Mbps -> Kbps
+        cir = bandwidth * 1024
 
-        # 3. commands modify
+        # 3. tentukan rasio inbound : outbound
+        if astinet_type.lower() == "standard":
+            cir_in = cir
+            cir_out = cir
+        elif astinet_type.lower() == "sme":
+            cir_in = cir // 4
+            cir_out = cir
+        elif "lite" in astinet_type.lower():
+            cir_in = cir // 2
+            cir_out = cir
+        else:
+            cir_in = cir
+            cir_out = cir 
+
+        # 4. commands modify
         commands = [
             "sys",
             f"interface {interface_name}",
             f"bandwidth {bandwidth}",
             f"undo qos-profile i",
             f"undo qos-profile o",
-            f"qos car cir {cir} pir {pir} i",
-            f"qos car cir {cir} pir {pir} o",
+            f"qos car cir {cir_in} pir {cir_in} i",   # inbound
+            f"qos car cir {cir_out} pir {cir_out} o", # outbound
             "commit",
             "quit",
             "quit"
         ]
 
-        # 4. kirim config
+        # 5. kirim config
         result_config = connection.send_config_set(
             commands, enter_config_mode=False, cmd_verify=False
         )
 
-        # 5. cek konfigurasi setelah
+        # 6. cek konfigurasi setelah
         check_after = connection.send_command(
             f"display current-configuration interface {interface_name}"
         )
 
-        # 6. gabungkan hasil output
+        # 7. gabungkan hasil output
         output = (
-            f"{pe_name}\n\n"
-            f"### Konfigurasi sebelum:\n{check_before}\n\n"
+            f"\n{check_before}\n\n"
             f"### Eksekusi modify:\n{result_config}\n\n"
-            f"### Konfigurasi setelah:\n{check_after}"
+            f"{pe_name}\n"
+            f"\n{check_after}"
         )
 
         return output
