@@ -8,7 +8,7 @@ def disconnect_astinet(connection, pe_name, interface_name):
         check_before = connection.send_command(
             f"display current-configuration interface {interface_name}"
         )
-        output_before = f"{pe_name}\n\n{check_before}"
+        output_before = f"{pe_name}\n{check_before}"
 
         # 2. jalankan config undo
         commands = [

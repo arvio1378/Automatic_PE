@@ -1,4 +1,4 @@
-def suspend_vpn_interface(connection, pe_name, interface_name):
+def suspend_vpn_interface(connection, interface_name):
     """
     Suspend interface VPN dengan menambahkan (SUSPEND) di description dan shutdown interface.
     Return hasil sebelum, saat suspend, dan sesudah konfigurasi.

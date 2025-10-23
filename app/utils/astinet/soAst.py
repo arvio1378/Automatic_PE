@@ -46,17 +46,10 @@ def suspend_astinet(connection, interface_name, pe_name):
 
         # gabungkan hasil biar sekali copy langsung jelas
         output = f"""
-            PE: {pe_name}
-            Interface: {interface_name}
-
-            # Sebelum Suspend:
-            {check_before}
-
-            # Config Result:
-            {result_config}
-
-            # Sesudah Suspend:
-            {check_after}
+{check_before}\n
+{result_config}\n
+{pe_name}
+{check_after}
         """
         return output.strip()
 

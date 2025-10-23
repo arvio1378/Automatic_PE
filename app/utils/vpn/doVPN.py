@@ -6,7 +6,7 @@ def disconnect_vpn_interface(connection, pe_name, interface_name):
     try:
         # 1. cek sebelum config
         check_before = connection.send_command(f"show run int {interface_name}")
-        output_before = f"{pe_name}\n\n{check_before}"
+        output_before = f"{pe_name}{check_before}"
 
         # 2. jalankan config DO
         commands = [

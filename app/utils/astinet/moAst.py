@@ -65,7 +65,7 @@ def modify_astinet(connection, interface_name, bandwidth, astinet_type, pe_name=
         output = (
             f"\n{check_before}\n\n"
             f"### Eksekusi modify:\n{result_config}\n\n"
-            f"{pe_name}\n"
+            f"{pe_name}"
             f"\n{check_after}"
         )
 

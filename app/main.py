@@ -69,6 +69,20 @@ if pages == "Astinet":
             st.subheader("PE Command")
             if "command_input_ast" not in st.session_state:
                 st.session_state["command_input_ast"] = "dis cur int "
+            
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                if st.button("display"):
+                    st.session_state["command_input_ast"] = "dis cur int "
+            
+            with col2:
+                if st.button("Cek SID"):
+                    st.session_state["command_input_ast"] = "dis int desc | in"
+            
+            with col3:
+                if st.button("cek IP"):
+                    st.session_state["command_input_ast"] = "dis ip routing-table vpn-instance Astinet_Mix "
 
             command_ast = st.text_area(
                 "Command",
@@ -286,6 +300,20 @@ elif pages == "VPN":
             st.subheader("PE Command")
             if "command_input_vpn" not in st.session_state:
                 st.session_state["command_input_vpn"] = "show run int "
+            
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                if st.button("display"):
+                    st.session_state["command_input_vpn"] = "show run int "
+            
+            with col2:
+                if st.button("Cek SID"):
+                    st.session_state["command_input_vpn"] = "sh int desc | in"
+            
+            with col3:
+                if st.button("cek IP"):
+                    st.session_state["command_input_vpn"] = "sh route vrf "
 
             command_vpn = st.text_area(
                 "Command",
@@ -339,6 +367,7 @@ elif pages == "VPN":
                         st.write("### Eksekusi disconnect:")
                         st.code(out_do, language=None)
                         st.write("### Konfigurasi setelah:")
+                        st.code(pe_name, language=None)
                         st.code(out_after, language=None)
                     except Exception as e:
                         st.error(str(e))
@@ -356,10 +385,10 @@ elif pages == "VPN":
                     if check_before is None:
                         st.error(f"Error: {check_after}")
                     else:
-                        st.code(pe_name, language=None)
                         st.write("### Konfigurasi sebelum:")
                         st.code(check_before, language=None)
                         st.write("### Eksekusi suspend:")
                         st.code(result_config, language=None)
                         st.write("### Konfigurasi setelah:")
+                        st.code(pe_name, language=None)
                         st.code(check_after, language=None)
